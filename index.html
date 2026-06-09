@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium Mobil Yoklama Sistemi</title>
+    <title>Premium Yoklama Otomasyonu Pro</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -14,261 +14,234 @@
     
     <style>
         :root {
-            --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            --bg-main: #f1f5f9;
-            --surface: #ffffff;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --accent: #818cf8;
+            --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #ch2626 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            --bg-app: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
         }
 
         * { 
             box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; 
             -webkit-tap-highlight-color: transparent; 
-            user-select: none;
+            user-select: none; 
         }
 
-        body {
-            background-color: var(--bg-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
+        body { 
+            background-color: var(--bg-app); 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
         }
 
-        .app-shell {
-            width: 100%;
-            max-width: 480px;
-            background: var(--surface);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        .app-container { 
+            width: 100%; 
+            max-width: 480px; 
+            background: #ffffff; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); 
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
-
-        header {
-            padding: 30px 24px;
-            background: var(--gradient-primary);
-            color: white;
-            text-align: center;
-            border-bottom-left-radius: 28px;
-            border-bottom-right-radius: 28px;
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
+        
+        header { 
+            padding: 28px 24px; 
+            background: var(--brand-gradient); 
+            color: white; 
+            text-align: center; 
+            border-bottom-left-radius: 32px; 
+            border-bottom-right-radius: 32px; 
+            box-shadow: 0 10px 30px rgba(63, 131, 248, 0.2); 
+            z-index: 10;
         }
 
         header h2 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-        header p { margin: 6px 0 0; font-size: 13px; opacity: 0.8; font-weight: 500; }
+        header p { margin: 6px 0 0; font-size: 13px; opacity: 0.85; font-weight: 500; }
 
-        .content { 
-            padding: 24px; 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            background: var(--surface);
-        }
+        .content-body { padding: 24px; flex-grow: 1; overflow-y: auto; background: #ffffff; }
 
-        /* Akıcı Ekran Geçiş Efekti */
-        .screen { display: none; animation: screenReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* Premium Ekran Açılış Efekti */
+        .screen { display: none; animation: nativeReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .screen.active { display: block; }
+        @keyframes nativeReveal { from { opacity: 0; transform: scale(0.97) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        @keyframes screenReveal { 
-            from { opacity: 0; transform: translateY(15px) scale(0.98); } 
-            to { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-
-        .form-group { margin-bottom: 24px; }
+        .input-wrapper { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
         
-        label { 
-            display: block; 
-            margin-bottom: 10px; 
-            font-weight: 700; 
-            color: var(--text-muted);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        input {
-            width: 100%;
-            padding: 16px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
+        input, select { 
+            width: 100%; 
+            padding: 16px 20px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 16px; 
             font-size: 16px; 
-            color: var(--text-dark);
-            outline: none;
-            transition: all 0.25s ease;
-            background: #f8fafc;
-            font-weight: 500;
-        }
-
-        input:focus { 
-            border-color: #4f46e5; 
-            background: #fff; 
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
-            transition: all 0.2s ease;
-        }
-
-        .btn:active { transform: scale(0.97); opacity: 0.95; }
-
-        .btn-secondary { 
-            background: transparent; 
-            color: var(--text-muted); 
-            margin-top: 16px; 
-            box-shadow: none;
+            color: var(--text-primary); 
+            outline: none; 
+            background: #f8fafc; 
             font-weight: 600;
-        }
-        
-        .btn-secondary:active { background: #f1f5f9; color: var(--text-dark); }
-
-        #reader { 
-            width: 100% !important; 
-            border: none !important; 
-            border-radius: 24px; 
-            overflow: hidden; 
-            background: #000;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-
-        /* Yenilenen Premium Kart Tasarımı (List Items) */
-        .attendance-card {
-            background: #f8fafc;
-            padding: 16px 20px;
-            margin-bottom: 12px;
-            border-radius: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
+        input:focus, select:focus { border-color: #4f46e5; background: #ffffff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
 
-        .attendance-card:hover { background: #f1f5f9; }
-
-        .student-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .student-details b { color: var(--text-dark); font-size: 16px; font-weight: 700; }
-        .student-details .time { color: var(--text-muted); font-weight: 600; font-size: 13px; }
-
-        /* Aksiyon Alanı: İkon ve Butonlar */
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .delete-btn {
-            background: #fee2e2;
-            color: #ef4444;
-            border: none;
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-
-        .delete-btn:active { background: #fca5a5; color: #b91c1c; transform: scale(0.9); }
-
-        .qr-box {
-            text-align: center;
-            padding: 28px;
-            background: #f8fafc;
-            border-radius: 24px;
-            margin-bottom: 24px;
-            border: 2px dashed #cbd5e1;
-        }
-        .qr-box img { max-width: 100%; height: auto; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-        .section-title {
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: var(--brand-gradient); 
+            color: white; 
+            border: none; 
+            border-radius: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
             font-size: 16px; 
-            margin: 24px 0 14px; 
-            color: var(--text-dark); 
-            font-weight: 800;
-            letter-spacing: -0.3px;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px;
+            transition: all 0.2s;
         }
+        .btn:active { transform: scale(0.97); opacity: 0.95; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); margin-top: 14px; box-shadow: none; font-weight: 600; }
+        .btn-ghost:active { background: #f1f5f9; }
+
+        /* Dashboard İstatistik Kartları */
+        .dashboard-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+        .stat-card { flex: 1; background: #f8fafc; border: 1px solid var(--border-color); padding: 12px; border-radius: 16px; text-align: center; }
+        .stat-card span { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; }
+        .stat-card h3 { margin: 4px 0 0; font-size: 20px; color: #4f46e5; font-weight: 800; }
+
+        .admin-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .btn-action { padding: 12px; font-size: 14px; border-radius: 14px; box-shadow: none; }
+
+        /* Premium Yoklama Listesi Kartları */
+        .attendance-item { 
+            background: var(--surface-gradient); 
+            padding: 16px 20px; 
+            margin-bottom: 12px; 
+            border-radius: 18px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid var(--border-color); 
+            border-left: 5px solid #4f46e5;
+            transition: all 0.2s;
+        }
+        .attendance-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .student-info b { color: var(--text-primary); font-size: 16px; display: block; font-weight: 700; }
+        .student-info span { color: var(--text-secondary); font-size: 12px; font-weight: 500; margin-top: 2px; display: inline-flex; align-items: center; gap: 4px; }
+        
+        .delete-btn { 
+            background: #fee2e2; 
+            color: #ef4444; 
+            border: none; 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: all 0.2s;
+        }
+        .delete-btn:active { background: #fca5a5; transform: scale(0.9); }
+
+        .qr-wrapper { text-align: center; padding: 24px; background: #f8fafc; border-radius: 24px; margin-bottom: 24px; border: 2px dashed #cbd5e1; position: relative; }
+        .qr-badge-timer { position: absolute; top: 12px; right: 12px; background: rgba(15, 23, 42, 0.9); color: white; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+        .qr-wrapper img { max-width: 100%; height: auto; border-radius: 14px; }
+        
+        #reader { width: 100% !important; border: none !important; border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
+<div class="app-container">
     <header>
-        <h2 id="app-title">Akıllı Yoklama</h2>
-        <p id="app-subtitle">Dijital Sınıf Yönetim Paneli</p>
+        <h2 id="app-title">Yoklama Otomasyonu</h2>
+        <p id="app-subtitle">Akıllı ve Güvenli Sınıf Yönetimi</p>
     </header>
 
-    <div class="content">
-        <div id="student-view" class="screen active">
-            <div class="form-group">
+    <div class="content-body">
+        <div id="student-screen" class="screen active">
+            <div class="input-wrapper">
                 <label>Öğrenci Adı Soyadı</label>
-                <input type="text" id="stdName" placeholder="Örn: Ahmet Yılmaz" autocomplete="off">
+                <input type="text" id="stdName" placeholder="Adınızı ve soyadınızı girin..." autocomplete="off">
             </div>
             <button class="btn" onclick="initScanner()">
-                <i class="fa-solid fa-camera" style="margin-right: 8px;"></i> Kamerayı Aç ve QR Okut
+                <i class="fa-solid fa-qrcode"></i> Sistemi Başlat ve QR Tara
             </button>
-            <button class="btn btn-secondary" onclick="showScreen('teacher-login')">Öğretmen Girişi</button>
+            <button class="btn btn-ghost" onclick="showScreen('teacher-auth-screen')">Yönetici Girişi</button>
         </div>
 
-        <div id="scanner-view" class="screen">
+        <div id="scanner-screen" class="screen">
             <div id="reader"></div>
-            <button class="btn" style="background: var(--gradient-danger); margin-top:24px; box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);" onclick="location.reload()">
-                <i class="fa-solid fa-xmark" style="margin-right: 8px;"></i> İptal Et ve Geri Dön
+            <button class="btn" style="background: var(--danger-gradient); margin-top:24px; box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2);" onclick="location.reload()">
+                <i class="fa-solid fa-xmark"></i> İşlemi İptal Et
             </button>
         </div>
 
-        <div id="teacher-login" class="screen">
-            <div class="form-group">
+        <div id="teacher-auth-screen" class="screen">
+            <div class="input-wrapper">
                 <label>Yönetici Şifresi</label>
                 <input type="password" id="adminPass" placeholder="••••" pattern="\d*">
             </div>
-            <button class="btn" onclick="doTeacherLogin()">Sisteme Giriş Yap</button>
-            <button class="btn btn-secondary" onclick="showScreen('student-view')">Öğrenci Girişine Dön</button>
+            <button class="btn" onclick="verifyAdminLogin()">Güvenli Giriş Yap</button>
+            <button class="btn btn-ghost" onclick="showScreen('student-screen')">Öğrenci Ekranına Dön</button>
         </div>
 
-        <div id="admin-panel" class="screen">
-            <div class="qr-box">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=YOKLAMA_SISTEMI_2026" alt="Sınıf QR">
-                <p style="margin:14px 0 0; color:var(--text-muted); font-size:13px; font-weight: 600;">Öğrencilerinize bu kodu taratın</p>
+        <div id="admin-dashboard-screen" class="screen">
+            <div class="qr-wrapper">
+                <div class="qr-badge-timer" id="qr-countdown">10s</div>
+                <img id="qr-img" src="" alt="Güvenlikli QR">
+                <p style="margin:14px 0 0; color:var(--text-secondary); font-size:12px; font-weight: 700;"><i class="fa-solid fa-user-shield" style="color: #10b981;"></i> Dinamik Anti-Hile Sistemi Aktif</p>
             </div>
+
+            <div class="input-wrapper" style="margin-bottom: 16px;">
+                <label>Filtreleme Tarihi</label>
+                <select id="dateSelectFilter" onchange="loadRealtimeData()"></select>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <span>Sınıf Mevcudu</span>
+                    <h3 id="stat-total">0</h3>
+                </div>
+                <div class="stat-card">
+                    <span>Son Giriş</span>
+                    <h3 id="stat-last-time">--:--</h3>
+                </div>
+            </div>
+
+            <div class="input-wrapper" style="margin-bottom: 16px;">
+                <input type="text" id="adminSearchInput" placeholder="Öğrenci ismi ile hızlı ara..." onkeyup="filterLiveList()">
+            </div>
+
+            <div class="admin-action-grid">
+                <button class="btn btn-action" style="background: var(--success-gradient);" onclick="exportDataToCSV()">
+                    <i class="fa-solid fa-file-excel"></i> Excel Çıktısı
+                </button>
+                <button class="btn btn-action" style="background: var(--danger-gradient);" onclick="wipeCurrentDateRecords()">
+                    <i class="fa-solid fa-trash-can"></i> Günü Sıfırla
+                </button>
+            </div>
+
+            <h3 style="font-size: 15px; margin: 20px 0 12px; color: var(--text-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Giriş Yapan Öğrenciler</h3>
+            <div id="live-attendance-container"></div>
             
-            <h3 class="section-title">Sınıfa Giriş Yapanlar</h3>
-            <div id="attendance-list">
-                <p style="text-align:center; color:var(--text-muted); font-size:14px;">Veritabanına bağlanılıyor...</p>
-            </div>
-            <button class="btn btn-secondary" onclick="location.reload()" style="color:#ef4444; margin-top: 30px; font-weight: 700;">
-                <i class="fa-solid fa-power-off" style="margin-right: 6px;"></i> Oturumu Kapat
-            </button>
+            <button class="btn btn-ghost" onclick="location.reload()" style="color:#ef4444; margin-top: 30px; font-weight: 700;"><i class="fa-solid fa-power-off"></i> Sistemi Kapat</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- FIREBASE YAPILANDIRMASI ---
+    // --- GÜNCEL FIREBASE YAPILANDIRMANIZ ---
     const firebaseConfig = {
         apiKey: "AIzaSyAbX3PaysRyiG2QrP2okpofB3XcXB8Fyt4",
         authDomain: "online-yoklama-3d0a2.firebaseapp.com",
@@ -281,138 +254,226 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const database = firebase.database();
+
+    // Akıllı Ses Sentezleyici (Gerçekçi Bip Sesi)
+    function triggerAudioFeedback() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = "sine"; 
+        oscillator.frequency.value = 900; 
+        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        oscillator.connect(gainNode); 
+        gainNode.connect(audioCtx.destination); 
+        oscillator.start(); 
+        oscillator.stop(audioCtx.currentTime + 0.12);
+    }
+
+    function fetchDateISO() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    // --- ÖĞRENCİ BELLEK HAFIZASI ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const rememberedIdentity = localStorage.getItem("app_user_cached_name");
+        if(rememberedIdentity) document.getElementById("stdName").value = rememberedIdentity;
+        setupDateDropdown();
+    });
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    // --- ÖĞRENCİ MODÜLÜ ---
-    let html5QrCode;
+    // --- GÜVENLİ DİNAMİK QR SİSTEMİ (HİLE KORUMA) ---
+    let qrRotationClock;
+    let validSecureKey = "";
 
+    function loopDynamicQR() {
+        let remainingSeconds = 10;
+        document.getElementById('qr-countdown').innerText = remainingSeconds + "s";
+        
+        validSecureKey = "SECURE_PASS_" + fetchDateISO() + "_" + Math.floor(Date.now() / 10000);
+        document.getElementById("qr-img").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${validSecureKey}`;
+
+        clearInterval(qrRotationClock);
+        qrRotationClock = setInterval(() => {
+            remainingSeconds--;
+            document.getElementById('qr-countdown').innerText = remainingSeconds + "s";
+            if(remainingSeconds <= 0) { loopDynamicQR(); }
+        }, 1000);
+    }
+
+    // --- ÖĞRENCİ KAMERA TARAMA ALTYAPISI ---
+    let qrReaderEngine;
     function initScanner() {
-        const nameInput = document.getElementById('stdName').value.trim();
-        if(!nameInput) {
-            Swal.fire({ title: 'Uyarı', text: 'Lütfen adınızı ve soyadınızı girin!', icon: 'warning', confirmButtonColor: '#4f46e5' });
+        const rawName = document.getElementById("stdName").value.trim();
+        if(!rawName) {
+            Swal.fire({ title: 'Ad Soyad Eksik', text: 'Lütfen listede görünmesini istediğiniz isminizi yazın.', icon: 'warning', confirmButtonColor: '#4f46e5' });
             return;
         }
 
-        showScreen('scanner-view');
-        html5QrCode = new Html5Qrcode("reader");
+        localStorage.setItem("app_user_cached_name", rawName);
+        showScreen('scanner-screen');
+        qrReaderEngine = new Html5Qrcode("reader");
         
-        html5QrCode.start(
+        qrReaderEngine.start(
             { facingMode: "environment" }, 
-            { fps: 15, qrbox: { width: 250, height: 250 } },
+            { fps: 15, qrbox: 240 },
             (decodedText) => {
-                if(decodedText === "YOKLAMA_SISTEMI_2026") {
-                    html5QrCode.stop().then(() => {
-                        submitAttendance(nameInput);
+                if(decodedText.startsWith("SECURE_PASS_" + fetchDateISO())) {
+                    qrReaderEngine.stop().then(() => {
+                        triggerAudioFeedback();
+                        commitAttendanceToCloud(rawName);
                     });
+                } else {
+                    Swal.fire({ title: 'Hatalı veya Süresi Dolan QR', text: 'Okutulan QR kodun süresi geçmiş veya sahte.', icon: 'error', confirmButtonColor: '#ef4444' }).then(() => location.reload());
                 }
             }
-        ).catch(err => {
-            Swal.fire({ title: 'Kamera Hatası', text: 'Kamera izni alınamadı.', icon: 'error', confirmButtonColor: '#4f46e5' });
-            showScreen('student-view');
-        });
+        ).catch(() => showScreen('student-screen'));
     }
 
-    function submitAttendance(name) {
-        const now = new Date();
-        const hour = now.getHours().toString().padStart(2, '0');
-        const min = now.getMinutes().toString().padStart(2, '0');
+    function commitAttendanceToCloud(studentName) {
+        const currentClock = new Date();
+        const formattedTime = currentClock.getHours().toString().padStart(2, '0') + ":" + currentClock.getMinutes().toString().padStart(2, '0');
+        const activeDay = fetchDateISO();
         
-        db.ref('yoklama_listesi').push({
-            isim: name,
-            saat: `${hour}:${min}`,
+        database.ref('premium_yoklama_data').child(activeDay).push({
+            isim: studentName,
+            saat: formattedTime,
             timestamp: Date.now()
         }).then(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Yoklama Alındı!',
-                text: `Hoş geldin, ${name}`,
-                showConfirmButton: false,
-                timer: 2000
-            }).then(() => location.reload());
+            Swal.fire({ icon: 'success', title: 'Giriş Başarılı!', text: `Yoklamanız Alındı: ${studentName}`, showConfirmButton: false, timer: 1800 }).then(() => location.reload());
         });
     }
 
-    // --- ÖĞRETMEN MODÜLÜ (GİRİŞ & CANLI LİSTE & SİLME) ---
-    function doTeacherLogin() {
+    // --- ÖĞRETMEN YÖNETİM MODÜLÜ ---
+    function verifyAdminLogin() {
         if(document.getElementById('adminPass').value === "1234") {
-            showScreen('admin-panel');
-            document.getElementById('app-title').innerText = "Kontrol Paneli";
-            document.getElementById('app-subtitle').innerText = "Canlı Sınıf Yoklama Yönetimi";
-            startLiveUpdate();
+            showScreen('admin-dashboard-screen');
+            document.getElementById('app-title').innerText = "Yönetim Paneli";
+            document.getElementById('app-subtitle').innerText = "Canlı Akıllı Sınıf Takibi";
+            loopDynamicQR();
+            loadRealtimeData();
         } else {
-            Swal.fire({ title: 'Hata', text: 'Şifre hatalı!', icon: 'error', confirmButtonColor: '#4f46e5' });
+            Swal.fire({ title: 'Giriş Engellendi', text: 'Yönetici şifresi geçersiz!', icon: 'error', confirmButtonColor: '#4f46e5' });
         }
     }
 
-    function startLiveUpdate() {
-        // Firebase anlık dinleyicisi
-        db.ref('yoklama_listesi').orderByChild('timestamp').on('value', (snapshot) => {
-            const container = document.getElementById('attendance-list');
-            container.innerHTML = "";
+    function setupDateDropdown() {
+        const selectElement = document.getElementById("dateSelectFilter");
+        selectElement.innerHTML = `<option value="${fetchDateISO()}">Bugün (${fetchDateISO()})</option>`;
+    }
+
+    let cloudDataListener;
+    let localCacheList = []; // Arama filtresi için yerel veri kopyası
+
+    function loadRealtimeData() {
+        const chosenDate = document.getElementById("dateSelectFilter").value;
+        const mainContainer = document.getElementById('live-attendance-container');
+        const totalBadge = document.getElementById('stat-total');
+        const lastTimeBadge = document.getElementById('stat-last-time');
+        
+        if(cloudDataListener) cloudDataListener.off();
+
+        cloudDataListener = database.ref('premium_yoklama_data').child(chosenDate);
+        cloudDataListener.orderByChild('timestamp').on('value', (snapshot) => {
+            mainContainer.innerHTML = "";
+            localCacheList = [];
+            let totalStudents = 0;
             
             if(snapshot.exists()) {
-                // Objeyi benzersiz ID'leri (Firebase Keys) koruyarak listelemek için döngüye alıyoruz
-                const items = [];
-                snapshot.forEach((childSnapshot) => {
-                    items.push({
-                        key: childSnapshot.key, // Silme işlemi için bu benzersiz key şart
-                        data: childSnapshot.val()
-                    });
+                snapshot.forEach((child) => {
+                    localCacheList.push({ key: child.key, data: child.val() });
+                    totalStudents++;
                 });
                 
-                // En son geleni en üstte göstermek için listeyi ters çevir
-                items.reverse().forEach(item => {
-                    container.innerHTML += `
-                        <div class="attendance-card">
-                            <div class="student-details">
-                                <b>${item.data.isim}</b>
-                                <span class="time"><i class="fa-regular fa-clock"></i> Giriş Saati: ${item.data.saat}</span>
-                            </div>
-                            <div class="actions">
-                                <button class="delete-btn" onclick="deleteStudent('${item.key}', '${item.data.isim}')" title="Sil">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
+                // En son geleni en üstte göster
+                localCacheList.reverse();
+                
+                totalBadge.innerText = totalStudents;
+                lastTimeBadge.innerText = localCacheList[0].data.saat;
+                
+                renderCustomList(localCacheList);
             } else {
-                container.innerHTML = "<p style='text-align:center; color:var(--text-muted); font-size:14px; padding: 20px;'>Sınıfta henüz kayıtlı öğrenci yok.</p>";
+                totalBadge.innerText = "0";
+                lastTimeBadge.innerText = "--:--";
+                mainContainer.innerHTML = "<p id='no-data-msg' style='text-align:center; color:var(--text-secondary); padding:20px; font-size:14px; font-weight:500;'>Sınıfta henüz kimse yok.</p>";
             }
         });
     }
 
-    // --- ÖĞRENCİ SİLME FONKSİYONU ---
-    function deleteStudent(key, name) {
+    function renderCustomList(itemsArray) {
+        const mainContainer = document.getElementById('live-attendance-container');
+        const chosenDate = document.getElementById("dateSelectFilter").value;
+        mainContainer.innerHTML = "";
+        
+        if(itemsArray.length === 0) {
+            mainContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted); padding:10px; font-size:14px;'>Eşleşen öğrenci bulunamadı.</p>";
+            return;
+        }
+
+        itemsArray.forEach(item => {
+            mainContainer.innerHTML += `
+                <div class="attendance-item">
+                    <div class="student-info">
+                        <b>${item.data.isim}</b>
+                        <span><i class="fa-regular fa-clock"></i> Giriş Saati: ${item.data.saat}</span>
+                    </div>
+                    <button class="delete-btn" onclick="executeSingleDelete('${chosenDate}','${item.key}')">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>`;
+        });
+    }
+
+    // Anlık Canlı Arama Filtrelemesi
+    function filterLiveList() {
+        const query = document.getElementById("adminSearchInput").value.toLowerCase().trim();
+        const filtered = localCacheList.filter(item => item.data.isim.toLowerCase().includes(query));
+        renderCustomList(filtered);
+    }
+
+    function executeSingleDelete(datePath, referenceKey) {
+        database.ref('premium_yoklama_data').child(datePath).child(referenceKey).remove();
+    }
+
+    function wipeCurrentDateRecords() {
+        const activeTargetDay = document.getElementById("dateSelectFilter").value;
         Swal.fire({
-            title: 'Emin misiniz?',
-            text: `"${name}" isimli öğrenciyi yoklama listesinden silmek istiyor musunuz?`,
+            title: 'Listeyi Sıfırla?',
+            text: `${activeTargetDay} tarihine ait tüm veriler kalıcı olarak silinecektir!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Evet, Sil',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Evet, Temizle',
             cancelButtonText: 'Vazgeç'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Firebase'den benzersiz anahtar yardımıyla veriyi kaldırır
-                db.ref('yoklama_listesi').child(key).remove().then(() => {
-                    Swal.fire({
-                        title: 'Silindi!',
-                        text: 'Öğrenci başarıyla listeden kaldırıldı.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }).catch((error) => {
-                    Swal.fire('Hata!', 'Veri silinirken bir sorun oluştu.', 'error');
-                });
-            }
+        }).then((res) => {
+            if(res.isConfirmed) database.ref('premium_yoklama_data').child(activeTargetDay).remove();
+        });
+    }
+
+    // Gelişmiş UTF-8 Destekli Excel / CSV Çıktısı Alıcı
+    function exportDataToCSV() {
+        const targetDate = document.getElementById("dateSelectFilter").value;
+        database.ref('premium_yoklama_data').child(targetDate).once('value', (snapshot) => {
+            if(!snapshot.exists()) return Swal.fire('Hata', 'Aktarılacak herhangi bir öğrenci kaydı yok.', 'error');
+            
+            let fileRows = "data:text/csv;charset=utf-8,\uFEFFÖğrenci Adı Soyadı,Giriş Zamanı,Tarih\n";
+            snapshot.forEach(child => {
+                const row = child.val();
+                fileRows += `"${row.isim}","${row.saat}","${targetDate}"\n`;
+            });
+            
+            const encodedDataUri = encodeURI(fileRows);
+            const hiddenDownloadAnchor = document.createElement("a");
+            hiddenDownloadAnchor.setAttribute("href", encodedDataUri);
+            hiddenDownloadAnchor.setAttribute("download", `Yoklama_Raporu_${targetDate}.csv`);
+            document.body.appendChild(hiddenDownloadAnchor);
+            hiddenDownloadAnchor.click();
+            document.body.removeChild(hiddenDownloadAnchor);
         });
     }
 </script>
