@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mobil Yoklama Sistemi</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* APK içinde sağa sola veya gereksiz aşağı kaymayı tamamen engeller */
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        header {
+            padding: 25px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+        }
+
+        header h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+
+        .content { 
+            padding: 24px; 
+            flex-grow: 1; 
+            overflow-y: auto; /* İçerik uzarsa sadece kendi içinde dikey kayar */
+        }
+
+        .screen { display: none; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(8px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .form-group { margin-bottom: 24px; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px; /* Mobil klavye açıldığında ekranın zoom yapmasını engeller */
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus { border-color: var(--primary); background: #fff; }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+
+        .btn-secondary { 
+            background: transparent; 
+            color: var(--text-sub); 
+            margin-top: 16px; 
+            box-shadow: none;
+            font-weight: 600;
+        }
+
+        #reader { 
+            width: 100% !important; 
+            border: none !important; 
+            border-radius: 18px; 
+            overflow: hidden; 
+            background: #000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .attendance-card {
+            background: #f1f5f9;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--primary);
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .attendance-card b { color: var(--text-main); font-size: 15px; }
+        .attendance-card .time { color: var(--primary); font-weight: 700; font-size: 14px; }
+
+        .qr-box {
+            text-align: center;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            border: 2px dashed #e2e8f0;
+        }
+        .qr-box img { max-width: 100%; height: auto; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header>
+        <h2 id="app-title">Akıllı Yoklama Sistemi</h2>
+    </header>
+
+    <div class="content">
+        <div id="student-view" class="screen active">
+            <div class="form-group">
+                <label>Öğrenci Adı Soyadı</label>
+                <input type="text" id="stdName" placeholder="Örn: Ahmet Yılmaz" autocomplete="off">
+            </div>
+            <button class="btn" onclick="initScanner()">Kamerayı Aç ve QR Okut</button>
+            <button class="btn btn-secondary" onclick="showScreen('teacher-login')">Öğretmen Girişi</button>
+        </div>
+
+        <div id="scanner-view" class="screen">
+            <div id="reader"></div>
+            <button class="btn" style="background:#ef4444; margin-top:20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);" onclick="location.reload()">İptal Et ve Geri Dön</button>
+        </div>
+
+        <div id="teacher-login" class="screen">
+            <div class="form-group">
+                <label>Yönetici Şifresi</label>
+                <input type="password" id="adminPass" placeholder="••••">
+            </div>
+            <button class="btn" onclick="doTeacherLogin()">Sisteme Giriş Yap</button>
+            <button class="btn btn-secondary" onclick="showScreen('student-view')">Öğrenci Girişine Dön</button>
+        </div>
+
+        <div id="admin-panel" class="screen">
+            <div class="qr-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=YOKLAMA_SISTEMI_2026" alt="Sınıf QR">
+                <p style="margin:12px 0 0; color:var(--text-sub); font-size:13px; font-weight: 500;">Öğrencilerinize bu kodu taratın</p>
+            </div>
+            
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--text-main);">Sınıfa Giriş Yapanlar</h3>
+            <div id="attendance-list">
+                <p style="text-align:center; color:var(--text-sub); font-size:14px;">Veritabanına bağlanılıyor...</p>
+            </div>
+            <button class="btn btn-secondary" onclick="location.reload()" style="color:#ef4444; margin-top: 24px;">Oturumu Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- PAYLAŞTIĞIN FIREBASE YAPILANDIRMASI ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbX3PaysRyiG2QrP2okpofB3XcXB8Fyt4",
+        authDomain: "online-yoklama-3d0a2.firebaseapp.com",
+        databaseURL: "https://online-yoklama-3d0a2-default-rtdb.firebaseio.com",
+        projectId: "online-yoklama-3d0a2",
+        storageBucket: "online-yoklama-3d0a2.firebasestorage.app",
+        messagingSenderId: "430013642186",
+        appId: "1:430013642186:web:98e2b97aa41e9fa7738b33",
+        measurementId: "G-D67XZY7WNN"
+    };
+
+    // Firebase Başlatma
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Ekran Değiştirme Fonksiyonu
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // --- ÖĞRENCİ MODÜLÜ ---
+    let html5QrCode;
+
+    function initScanner() {
+        const nameInput = document.getElementById('stdName').value.trim();
+        if(!nameInput) {
+            Swal.fire({ title: 'Uyarı', text: 'Lütfen adınızı ve soyadınızı girin!', icon: 'warning', confirmButtonColor: '#4f46e5' });
+            return;
+        }
+
+        showScreen('scanner-view');
+        
+        html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+
+        // Arka kamerayı zorunlu kıl ve başlat
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText) => {
+                if(decodedText === "YOKLAMA_SISTEMI_2026") {
+                    html5QrCode.stop().then(() => {
+                        submitAttendance(nameInput);
+                    });
+                }
+            }
+        ).catch(err => {
+            Swal.fire({
+                title: 'Kamera Hatası',
+                text: 'Kamera izni verilmedi veya APK derleme ayarlarında kamera izni eksik.',
+                icon: 'error',
+                confirmButtonColor: '#4f46e5'
+            });
+            showScreen('student-view');
+        });
+    }
+
+    function submitAttendance(name) {
+        const now = new Date();
+        const hour = now.getHours().toString().padStart(2, '0');
+        const min = now.getMinutes().toString().padStart(2, '0');
+        
+        // Firebase Realtime Database kaydı
+        db.ref('yoklama_listesi').push({
+            isim: name,
+            saat: `${hour}:${min}`,
+            timestamp: Date.now()
+        }).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Yoklama Alındı!',
+                text: `Hoş geldin, ${name}`,
+                showConfirmButton: false,
+                timer: 2000
+            }).then(() => location.reload());
+        });
+    }
+
+    // --- ÖĞRETMEN MODÜLÜ (ŞİFRE: 1234) ---
+    function doTeacherLogin() {
+        const pass = document.getElementById('adminPass').value;
+        if(pass === "1234") {
+            showScreen('admin-panel');
+            document.getElementById('app-title').innerText = "Öğretmen Kontrol Paneli";
+            startLiveUpdate();
+        } else {
+            Swal.fire({ title: 'Hata', text: 'Giriş şifresi hatalı!', icon: 'error', confirmButtonColor: '#4f46e5' });
+        }
+    }
+
+    function startLiveUpdate() {
+        // Firebase Realtime Database canlı dinleyici (Real-time Sync)
+        db.ref('yoklama_listesi').orderByChild('timestamp').on('value', (snapshot) => {
+            const container = document.getElementById('attendance-list');
+            container.innerHTML = "";
+            const data = snapshot.val();
+            
+            if(data) {
+                // Listeyi ters çevirerek en son kayıt olan öğrenciyi en üstte gösterir
+                const sorted = Object.values(data).reverse();
+                sorted.forEach(entry => {
+                    container.innerHTML += `
+                        <div class="attendance-card">
+                            <span><b>${entry.isim}</b></span>
+                            <span class="time">${entry.saat}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = "<p style='text-align:center; color:var(--text-sub); font-size:14px;'>Sınıfta henüz kayıtlı öğrenci yok.</p>";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
